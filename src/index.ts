@@ -2,6 +2,8 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import {
   GenerateCommand,
   ListCommand,
@@ -12,12 +14,15 @@ import {
   GitignoreCommand
 } from './commands';
 
+// Read version from package.json
+const packageJson = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf8'));
+
 const program = new Command();
 
 program
   .name('rulesync')
   .description('Easily sync all of your favourite AI assistant instruction files')
-  .version('1.0.0');
+  .version(packageJson.version);
 
 // Generate command
 program

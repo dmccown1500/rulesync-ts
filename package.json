@@ -11,8 +11,16 @@
         "dev": "tsx src/index.ts",
         "start": "node dist/index.js",
         "test": "jest",
+        "test:watch": "jest --watch",
+        "test:coverage": "jest --coverage",
         "lint": "eslint src/**/*.ts",
-        "format": "prettier --write src/**/*.ts"
+        "lint:fix": "eslint src/**/*.ts --fix",
+        "format": "prettier --write src/**/*.ts",
+        "format:check": "prettier --check src/**/*.ts",
+        "clean": "rm -rf dist",
+        "prebuild": "npm run clean",
+        "prepare": "npm run build",
+        "version": "npm run build && npm test"
     },
     "keywords": [
         "ai",
@@ -28,6 +36,14 @@
     ],
     "author": "Rewritten in TypeScript",
     "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/dmccown1500/rulesync-ts.git"
+    },
+    "bugs": {
+        "url": "https://github.com/dmccown1500/rulesync-ts/issues"
+    },
+    "homepage": "https://github.com/dmccown1500/rulesync-ts#readme",
     "dependencies": {
         "commander": "^11.1.0",
         "chalk": "^5.3.0",
@@ -51,5 +67,14 @@
     },
     "engines": {
         "node": ">=18.0.0"
+    },
+    "files": [
+        "dist/**/*",
+        "README.md",
+        "LICENSE",
+        "CHANGELOG.md"
+    ],
+    "publishConfig": {
+        "access": "public"
     }
 }
