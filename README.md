@@ -126,11 +126,13 @@ Both approaches create the same result - AI assistant files generated from your 
 
 - **typescript** - TypeScript best practices and patterns
 - **python** - Python coding standards and idioms
-- **javascript** - Modern JavaScript conventions
 - **go** - Go language conventions and practices
 - **java** - Java development guidelines
 - **rust** - Rust programming patterns
-- And more: C#, PHP, Swift, Kotlin
+- **csharp** - C# development guidelines and patterns
+- **php** - PHP coding standards and best practices
+- **swift** - Swift programming language conventions
+- **kotlin** - Kotlin development best practices
 
 ### Framework Templates
 
@@ -140,7 +142,13 @@ Both approaches create the same result - AI assistant files generated from your 
 - **nextjs** - Next.js development guidelines
 - **angular** - Angular application patterns
 - **vue** - Vue.js component guidelines
-- And more: Rails, Spring, Laravel, Flutter
+- **nodejs** - Node.js server development patterns
+- **rails** - Ruby on Rails framework conventions
+- **spring** - Spring Boot Java framework patterns
+- **laravel** - Laravel PHP framework best practices
+- **flutter** - Flutter mobile development guidelines
+- **fastapi** - FastAPI Python framework patterns
+- **svelte** - Svelte framework development practices
 
 ## Supported AI Assistants
 
