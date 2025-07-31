@@ -1,4 +1,4 @@
-import { RuleDiscoveryService } from '../services/RuleDiscoveryService';
+import { RuleDiscoveryService } from '../../services/RuleDiscoveryService';
 
 describe('Services', () => {
   describe('RuleDiscoveryService', () => {
@@ -8,15 +8,15 @@ describe('Services', () => {
       ruleDiscovery = new RuleDiscoveryService();
     });
 
-    test('should return all 8 rules', () => {
+    test('should return all 12 rules', () => {
       const rules = ruleDiscovery.getRules();
-      expect(rules).toHaveLength(8);
+      expect(rules).toHaveLength(12);
     });
 
     test('should return rules with correct shortcodes', () => {
       const rules = ruleDiscovery.getRules();
-      const shortcodes = rules.map(rule => rule.shortcode());
-      
+      const shortcodes = rules.map((rule) => rule.shortcode());
+
       expect(shortcodes).toContain('claude');
       expect(shortcodes).toContain('cursor');
       expect(shortcodes).toContain('windsurf');
@@ -25,6 +25,10 @@ describe('Services', () => {
       expect(shortcodes).toContain('cline');
       expect(shortcodes).toContain('junie');
       expect(shortcodes).toContain('codex');
+      expect(shortcodes).toContain('aider');
+      expect(shortcodes).toContain('continue');
+      expect(shortcodes).toContain('amazonq');
+      expect(shortcodes).toContain('cody');
     });
 
     test('should find rule by shortcode', () => {
@@ -41,8 +45,8 @@ describe('Services', () => {
 
     test('should return rules with correct names', () => {
       const rules = ruleDiscovery.getRules();
-      const names = rules.map(rule => rule.name());
-      
+      const names = rules.map((rule) => rule.name());
+
       expect(names).toContain('Claude');
       expect(names).toContain('Cursor');
       expect(names).toContain('Windsurf');
@@ -51,12 +55,16 @@ describe('Services', () => {
       expect(names).toContain('Cline');
       expect(names).toContain('Junie');
       expect(names).toContain('OpenAI Codex');
+      expect(names).toContain('Aider');
+      expect(names).toContain('Continue.dev');
+      expect(names).toContain('Amazon Q Developer');
+      expect(names).toContain('Sourcegraph Cody');
     });
 
     test('should return rules with correct file paths', () => {
       const rules = ruleDiscovery.getRules();
-      const paths = rules.map(rule => rule.path());
-      
+      const paths = rules.map((rule) => rule.path());
+
       expect(paths).toContain('CLAUDE.md');
       expect(paths).toContain('.cursorrules');
       expect(paths).toContain('.windsurfrules');
@@ -65,6 +73,10 @@ describe('Services', () => {
       expect(paths).toContain('.clinerules/project.md');
       expect(paths).toContain('.junie/guidelines.md');
       expect(paths).toContain('AGENTS.md');
+      expect(paths).toContain('.aider.conf.yml');
+      expect(paths).toContain('.continue/config.json');
+      expect(paths).toContain('.amazonq/rules/coding-guidelines.md');
+      expect(paths).toContain('.vscode/cody.json');
     });
   });
 });

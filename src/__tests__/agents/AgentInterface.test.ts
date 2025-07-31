@@ -1,13 +1,13 @@
-import { 
-  Claude, 
-  Cursor, 
-  Windsurf, 
-  Gemini, 
-  GitHubCopilot, 
-  Cline, 
-  Junie, 
-  OpenAICodex 
-} from '../rules';
+import {
+  Claude,
+  Cursor,
+  Windsurf,
+  Gemini,
+  GitHubCopilot,
+  Cline,
+  Junie,
+  OpenAICodex,
+} from '../../agents';
 
 describe('Rules', () => {
   describe('Claude', () => {
