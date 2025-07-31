@@ -6,15 +6,18 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 import { ConfigService } from '../services/ConfigService';
 import { RuleDiscoveryService } from '../services/RuleDiscoveryService';
-import { GenerateOptions, RuleFile } from '../types';
+import { ContentFilterService } from '../services/ContentFilterService';
+import { GenerateOptions, RuleFile, CompositionRule } from '../types';
 
 export class GenerateCommand {
   private configService: ConfigService;
   private ruleDiscovery: RuleDiscoveryService;
+  private contentFilter: ContentFilterService;
 
   constructor() {
     this.configService = new ConfigService();
     this.ruleDiscovery = new RuleDiscoveryService();
+    this.contentFilter = new ContentFilterService();
   }
 
   async execute(options: GenerateOptions = {}): Promise<number> {
@@ -22,13 +25,8 @@ export class GenerateCommand {
       return 1;
     }
 
-    const sourceFile = await this.getSourceFile(options);
-    if (!sourceFile) {
-      return 1;
-    }
-
-    const sourceContent = await this.getSourceContent(sourceFile);
-    if (!sourceContent) {
+    const composedContent = await this.getComposedContent(options);
+    if (!composedContent) {
       return 1;
     }
 
@@ -36,10 +34,12 @@ export class GenerateCommand {
     const rules = this.ruleDiscovery.getRules();
     const disabledRules = this.configService.getDisabledRules();
 
-    const enabledRules = rules.filter(rule => !disabledRules.includes(rule.shortcode()));
+    const enabledRules = rules.filter((rule) => !disabledRules.includes(rule.shortcode()));
 
     if (enabledRules.length === 0) {
-      console.log(chalk.yellow('No enabled rules found. Use "rulesync rules:list" to see available rules.'));
+      console.log(
+        chalk.yellow('No enabled rules found. Use "rulesync rules:list" to see available rules.')
+      );
       return 0;
     }
 
@@ -49,6 +49,23 @@ export class GenerateCommand {
     let generated = 0;
     let skipped = 0;
 
+    // Validate excluded agents before processing
+    const allRules = this.ruleDiscovery.getRules();
+    const validShortcodes = allRules.map((rule) => rule.shortcode());
+    const invalidAgents = this.contentFilter.validateExcludedAgents(
+      composedContent,
+      validShortcodes
+    );
+
+    if (invalidAgents.length > 0) {
+      console.warn(
+        chalk.yellow(
+          `Warning: Unknown agent shortcodes in exclusion comments: ${invalidAgents.join(', ')}`
+        )
+      );
+      console.log(`Valid shortcodes: ${validShortcodes.join(', ')}`);
+    }
+
     for (const rule of enabledRules) {
       const targetPath = rule.path();
       const targetDir = path.dirname(targetPath);
@@ -57,10 +74,15 @@ export class GenerateCommand {
         fs.mkdirpSync(targetDir);
       }
 
-      const finalContent = this.buildFinalContent(sourceContent, baseRules);
+      // Filter content for this specific agent
+      const baseContent = this.buildFinalContent(composedContent, baseRules);
+      const filteredContent = this.contentFilter.filterContentForAgent(
+        baseContent,
+        rule.shortcode()
+      );
 
-      if (await this.shouldWriteFile(targetPath, finalContent, options)) {
-        fs.writeFileSync(targetPath, finalContent);
+      if (await this.shouldWriteFile(targetPath, filteredContent, options)) {
+        fs.writeFileSync(targetPath, filteredContent);
         console.log(`${chalk.green('Generated:')} ${targetPath}`);
         generated++;
       } else {
@@ -70,7 +92,9 @@ export class GenerateCommand {
     }
 
     console.log('');
-    console.log(chalk.blue(`Generation complete: ${generated} files generated, ${skipped} skipped.`));
+    console.log(
+      chalk.blue(`Generation complete: ${generated} files generated, ${skipped} skipped.`)
+    );
 
     return 0;
   }
@@ -152,7 +176,11 @@ export class GenerateCommand {
     return content;
   }
 
-  private async shouldWriteFile(targetPath: string, content: string, options: GenerateOptions): Promise<boolean> {
+  private async shouldWriteFile(
+    targetPath: string,
+    content: string,
+    options: GenerateOptions
+  ): Promise<boolean> {
     if (!fs.existsSync(targetPath)) {
       return true;
     }
@@ -166,12 +194,14 @@ export class GenerateCommand {
       return true;
     }
 
-    const { overwrite } = await inquirer.prompt([{
-      type: 'confirm',
-      name: 'overwrite',
-      message: `File exists and is different: ${targetPath}. Overwrite?`,
-      default: false
-    }]);
+    const { overwrite } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'overwrite',
+        message: `File exists and is different: ${targetPath}. Overwrite?`,
+        default: false,
+      },
+    ]);
 
     return overwrite;
   }
@@ -195,12 +225,14 @@ export class GenerateCommand {
     console.log(`Consider initializing git with: ${chalk.cyan('git init')}`);
     console.log('');
 
-    const { continue: shouldContinue } = await inquirer.prompt([{
-      type: 'confirm',
-      name: 'continue',
-      message: 'Do you want to continue anyway?',
-      default: false
-    }]);
+    const { continue: shouldContinue } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'continue',
+        message: 'Do you want to continue anyway?',
+        default: false,
+      },
+    ]);
 
     return shouldContinue;
   }
@@ -224,19 +256,23 @@ export class GenerateCommand {
 
       console.log('');
 
-      const { useTemplate } = await inquirer.prompt([{
-        type: 'confirm',
-        name: 'useTemplate',
-        message: 'Would you like to use one of these as a template for rulesync.md?',
-        default: false
-      }]);
+      const { useTemplate } = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'useTemplate',
+          message: 'Would you like to use one of these as a template for rulesync.md?',
+          default: false,
+        },
+      ]);
 
       if (useTemplate) {
-        const { choice } = await inquirer.prompt([{
-          type: 'input',
-          name: 'choice',
-          message: 'Enter the number of the file to use as template:'
-        }]);
+        const { choice } = await inquirer.prompt([
+          {
+            type: 'input',
+            name: 'choice',
+            message: 'Enter the number of the file to use as template:',
+          },
+        ]);
 
         const choiceIndex = parseInt(choice);
         if (existingRuleFiles[choiceIndex]) {
@@ -271,7 +307,7 @@ export class GenerateCommand {
           ruleFiles.push({
             name: rule.name(),
             path: rulePath,
-            rule: rule
+            rule: rule,
           });
         }
       }
@@ -292,21 +328,25 @@ export class GenerateCommand {
       console.log(`  Global: ${globalFile}`);
       console.log('');
 
-      const { augment } = await inquirer.prompt([{
-        type: 'confirm',
-        name: 'augment',
-        message: 'Would you like to combine both files? (Local rules first, then global rules)',
-        default: true
-      }]);
+      const { augment } = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'augment',
+          message: 'Would you like to combine both files? (Local rules first, then global rules)',
+          default: true,
+        },
+      ]);
 
       shouldAugment = augment;
 
-      const { savePreference } = await inquirer.prompt([{
-        type: 'confirm',
-        name: 'savePreference',
-        message: `Save this preference ${shouldAugment ? '(combine files)' : '(use local only)'} for future generate calls in this directory?`,
-        default: false
-      }]);
+      const { savePreference } = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'savePreference',
+          message: `Save this preference ${shouldAugment ? '(combine files)' : '(use local only)'} for future generate calls in this directory?`,
+          default: false,
+        },
+      ]);
 
       if (savePreference) {
         this.configService.setAugmentPreference(shouldAugment);
@@ -345,8 +385,90 @@ export class GenerateCommand {
 
     fs.writeFileSync(rulesyncPath, templateContent);
 
-    console.log(chalk.blue(`Created rulesync.md using ${templateFile.name} as template: ${rulesyncPath}`));
+    console.log(
+      chalk.blue(`Created rulesync.md using ${templateFile.name} as template: ${rulesyncPath}`)
+    );
 
     return rulesyncPath;
+  }
+
+  private async getComposedContent(options: GenerateOptions): Promise<string | null> {
+    const mainSourceFile = await this.getSourceFile(options);
+    if (!mainSourceFile) {
+      return null;
+    }
+
+    const mainContent = await this.getSourceContent(mainSourceFile);
+    if (!mainContent) {
+      return null;
+    }
+
+    const compositionRules = this.configService.getEnabledCompositionRules();
+
+    if (compositionRules.length === 0) {
+      return mainContent;
+    }
+
+    // Build content in logical order: composition rules first (base → tech-stack), then project rules
+    const contentParts: string[] = [];
+
+    // Add composition rules in priority order (base → tech-stack)
+    for (const rule of compositionRules) {
+      const content = await this.getCompositionRuleContent(rule);
+      if (content) {
+        contentParts.push(content);
+      }
+    }
+
+    // Add main project content last (most specific)
+    contentParts.push(mainContent);
+
+    if (contentParts.length === 1) {
+      return mainContent;
+    }
+
+    console.log(
+      chalk.blue(
+        `Composing rules from ${contentParts.length} sources (base → tech-stack → project)...`
+      )
+    );
+    return contentParts.join('\n\n---\n\n');
+  }
+
+  private async getCompositionRuleContent(rule: CompositionRule): Promise<string | null> {
+    try {
+      const resolvedPath = this.resolveCompositionRulePath(rule.path);
+
+      if (this.isUrl(resolvedPath)) {
+        const response = await axios.get(resolvedPath, { timeout: 10000 });
+        console.log(`${chalk.blue('Loaded:')} ${rule.name} (${resolvedPath})`);
+        return response.data;
+      } else {
+        if (!fs.existsSync(resolvedPath)) {
+          console.warn(
+            chalk.yellow(`Composition rule file not found: ${rule.name} (${resolvedPath})`)
+          );
+          return null;
+        }
+        const content = fs.readFileSync(resolvedPath, 'utf8');
+        console.log(`${chalk.blue('Loaded:')} ${rule.name} (${resolvedPath})`);
+        return content;
+      }
+    } catch (error) {
+      console.warn(chalk.yellow(`Failed to load composition rule ${rule.name}: ${error}`));
+      return null;
+    }
+  }
+
+  private resolveCompositionRulePath(rulePath: string): string {
+    if (this.isUrl(rulePath)) {
+      return rulePath;
+    }
+
+    if (path.isAbsolute(rulePath)) {
+      return rulePath;
+    }
+
+    return path.resolve(process.cwd(), rulePath);
   }
 }

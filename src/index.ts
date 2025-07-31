@@ -7,11 +7,14 @@ import { join } from 'path';
 import {
   GenerateCommand,
   ListCommand,
+  AgentsCommand,
+  TemplatesCommand,
   ConfigCommand,
   EnableCommand,
   DisableCommand,
   BaseCommand,
-  GitignoreCommand
+  GitignoreCommand,
+  ComposeCommand
 } from './commands';
 
 // Read version from package.json
@@ -21,94 +24,167 @@ const program = new Command();
 
 program
   .name('rulesync')
-  .description('Easily sync all of your favourite AI assistant instruction files')
+  .description(chalk.cyan('Sync AI assistant rules across Claude, Cursor, Windsurf, and more'))
   .version(packageJson.version);
 
 // Generate command
 program
   .command('generate')
-  .description('Generate AI assistant rule files')
-  .option('--force', 'Force generation without prompts')
-  .option('--overwrite', 'Overwrite existing files')
-  .option('--from <path>', 'Custom source file path')
+  .description(chalk.green('Create rule files for all AI assistants from rulesync.md'))
+  .option('--force', 'Skip confirmation prompts')
+  .option('--overwrite', 'Replace existing files')
+  .option('--from <path>', 'Use custom source file instead of rulesync.md')
   .action(async (options) => {
     const command = new GenerateCommand();
     const exitCode = await command.execute(options);
     process.exit(exitCode);
   });
 
-// Rules list command
-program
-  .command('rules:list')
-  .alias('list')
-  .description('Show available AI assistants')
+// Agents command with subcommands
+const agentsProgram = program
+  .command('agents')
+  .description(chalk.blue('List and manage AI assistants'));
+
+agentsProgram
+  .command('list')
+  .description(chalk.white('Show all AI assistants with their status'))
   .action(() => {
-    const command = new ListCommand();
+    const command = new AgentsCommand();
     const exitCode = command.execute();
     process.exit(exitCode);
   });
 
-// Config command
+agentsProgram
+  .command('enable <agent>')
+  .description(chalk.green('Enable rule generation for an AI assistant'))
+  .action((rule) => {
+    const command = new AgentsCommand();
+    const exitCode = command.executeEnable(rule);
+    process.exit(exitCode);
+  });
+
+agentsProgram
+  .command('disable <agent>')
+  .description(chalk.red('Disable rule generation for an AI assistant'))
+  .action((rule) => {
+    const command = new AgentsCommand();
+    const exitCode = command.executeDisable(rule);
+    process.exit(exitCode);
+  });
+
+// Default action for agents (show list)
+agentsProgram.action(() => {
+  const command = new AgentsCommand();
+  const exitCode = command.execute();
+  process.exit(exitCode);
+});
+
+// Templates command
 program
-  .command('config')
-  .description('View current configuration')
+  .command('templates')
+  .description(chalk.magenta('List all available rule templates'))
   .action(() => {
-    const command = new ConfigCommand();
+    const command = new TemplatesCommand();
     const exitCode = command.execute();
     process.exit(exitCode);
   });
 
-// Enable command
+// Compose command (streamlined workflow)
 program
-  .command('enable <rule>')
-  .description('Enable specific AI assistant')
-  .action((rule) => {
-    const command = new EnableCommand();
-    const exitCode = command.execute(rule);
-    process.exit(exitCode);
-  });
-
-// Disable command
-program
-  .command('disable <rule>')
-  .description('Disable specific AI assistant')
-  .action((rule) => {
-    const command = new DisableCommand();
-    const exitCode = command.execute(rule);
-    process.exit(exitCode);
-  });
-
-// Base command
-program
-  .command('base [path]')
-  .description('Set base rules (URL or file path)')
-  .action((path) => {
-    const command = new BaseCommand();
-    const exitCode = command.execute(path);
-    process.exit(exitCode);
+  .command('compose [rules...]')
+  .description(chalk.blue('Compose rules from multiple sources into rulesync.md'))
+  .option('--force', 'Skip confirmation prompts')
+  .action(async (rules, options) => {
+    if (!rules || rules.length === 0) {
+      const command = new ComposeCommand();
+      const exitCode = await command.listAvailableTemplates();
+      process.exit(exitCode);
+    } else {
+      const command = new ComposeCommand();
+      const exitCode = await command.execute(rules, options);
+      process.exit(exitCode);
+    }
   });
 
 // Gitignore command
 program
-  .command('gitignore:generate')
-  .alias('gitignore')
-  .description('Add AI assistant rule files to .gitignore')
+  .command('gitignore')
+  .description(chalk.cyan('Add AI assistant files to .gitignore'))
   .action(() => {
     const command = new GitignoreCommand();
     const exitCode = command.execute();
     process.exit(exitCode);
   });
 
+// Base command
+program
+  .command('base [path]')
+  .description(chalk.yellow('Set persistent base rules for all generations'))
+  .action((path) => {
+    const command = new BaseCommand();
+    const exitCode = command.execute(path);
+    process.exit(exitCode);
+  });
+
+// Config command
+program
+  .command('config')
+  .description(chalk.magenta('Show current settings'))
+  .action(() => {
+    const command = new ConfigCommand();
+    const exitCode = command.execute();
+    process.exit(exitCode);
+  });
+
+// --- DEPRECATED COMMANDS (will be removed) ---
+
+// Rules list command (deprecated)
+program
+  .command('rules:list')
+  .alias('list')
+  .description(chalk.gray('Show AI assistants (deprecated, use "agents")'))
+  .action(() => {
+    const command = new ListCommand();
+    const exitCode = command.execute();
+    process.exit(exitCode);
+  });
+
+// Enable command (deprecated)
+program
+  .command('enable <rule>')
+  .description(chalk.gray('Enable AI assistant (deprecated, use "agents enable")'))
+  .action((rule) => {
+    const command = new EnableCommand();
+    const exitCode = command.execute(rule);
+    process.exit(exitCode);
+  });
+
+// Disable command (deprecated)
+program
+  .command('disable <rule>')
+  .description(chalk.gray('Disable AI assistant (deprecated, use "agents disable")'))
+  .action((rule) => {
+    const command = new DisableCommand();
+    const exitCode = command.execute(rule);
+    process.exit(exitCode);
+  });
+
 // Default action (show help)
 program.action(() => {
-  console.log(chalk.blue('Rulesync - AI Assistant Rules Synchronization Tool'));
+  console.log(chalk.blue.bold('🤖 Rulesync - Sync Rules Across AI Assistants'));
   console.log('');
-  console.log('Quick Start:');
-  console.log('1. Create a rulesync.md file with your rules');
-  console.log('2. Run "rulesync generate" to create all AI assistant rule files');
-  console.log('3. Your rules are now synced across all supported AI assistants!');
+  console.log(chalk.green('Quick Start:'));
+  console.log('  1. Create a ' + chalk.cyan('rulesync.md') + ' file with your coding rules');
+  console.log('  2. Run ' + chalk.yellow('rulesync generate') + ' to create assistant-specific files');
+  console.log('  3. Your rules are now synced across Claude, Cursor, Windsurf, and more!');
   console.log('');
-  program.help();
+  console.log(chalk.green('Common Commands:'));
+  console.log('  ' + chalk.yellow('rulesync generate') + '           Create rule files from rulesync.md');
+  console.log('  ' + chalk.yellow('rulesync agents') + '             List all AI assistants');
+  console.log('  ' + chalk.yellow('rulesync templates') + '          Show available templates');
+  console.log('  ' + chalk.yellow('rulesync compose clean-code') + '  Compose rules from multiple sources');
+  console.log('');
+  console.log('Run ' + chalk.cyan('rulesync --help') + ' for all commands');
 });
 
 // Handle unknown commands

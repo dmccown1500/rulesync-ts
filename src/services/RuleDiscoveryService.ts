@@ -1,17 +1,21 @@
-import { RuleInterface } from '../rules/RuleInterface';
-import { 
-  Claude, 
-  Cursor, 
-  Windsurf, 
-  Gemini, 
-  GitHubCopilot, 
-  Cline, 
-  Junie, 
-  OpenAICodex 
-} from '../rules';
+import { AgentInterface } from '../agents/AgentInterface';
+import {
+  Claude,
+  Cursor,
+  Windsurf,
+  Gemini,
+  GitHubCopilot,
+  Cline,
+  Junie,
+  OpenAICodex,
+  Aider,
+  Continue,
+  AmazonQ,
+  Cody,
+} from '../agents';
 
 export class RuleDiscoveryService {
-  private rules: RuleInterface[];
+  private rules: AgentInterface[];
 
   constructor() {
     this.rules = [
@@ -22,15 +26,19 @@ export class RuleDiscoveryService {
       new GitHubCopilot(),
       new Cline(),
       new Junie(),
-      new OpenAICodex()
+      new OpenAICodex(),
+      new Aider(),
+      new Continue(),
+      new AmazonQ(),
+      new Cody(),
     ];
   }
 
-  getRules(): RuleInterface[] {
+  getRules(): AgentInterface[] {
     return this.rules;
   }
 
-  getRuleByShortcode(shortcode: string): RuleInterface | undefined {
-    return this.rules.find(rule => rule.shortcode() === shortcode);
+  getRuleByShortcode(shortcode: string): AgentInterface | undefined {
+    return this.rules.find((rule) => rule.shortcode() === shortcode);
   }
 }

@@ -88,16 +88,4 @@ temp/
 # Test files
 test-output/
 
-# Rulesync - AI Assistant Rules
-# Generated automatically by rulesync
 
-CLAUDE.md
-.windsurfrules
-GEMINI.md
-.github/copilot-instructions.md
-.clinerules/project.md
-.junie/guidelines.md
-AGENTS.md
-.rulesync/rulesync.json
-
-# End Rulesync

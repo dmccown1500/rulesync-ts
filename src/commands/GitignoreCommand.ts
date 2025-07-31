@@ -3,6 +3,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import { ConfigService } from '../services/ConfigService';
 import { RuleDiscoveryService } from '../services/RuleDiscoveryService';
+import { AgentInterface } from '../types';
 
 export class GitignoreCommand {
   private configService: ConfigService;
@@ -18,10 +19,12 @@ export class GitignoreCommand {
     const rules = this.ruleDiscovery.getRules();
     const disabledRules = this.configService.getDisabledRules();
 
-    const enabledRules = rules.filter(rule => !disabledRules.includes(rule.shortcode()));
+    const enabledRules = rules.filter((rule) => !disabledRules.includes(rule.shortcode()));
 
     if (enabledRules.length === 0) {
-      console.log(chalk.yellow('No enabled rules found. Use "rulesync rules:list" to see available rules.'));
+      console.log(
+        chalk.yellow('No enabled rules found. Use "rulesync rules:list" to see available rules.')
+      );
       return 0;
     }
 
@@ -33,7 +36,7 @@ export class GitignoreCommand {
 
     // Prepare the rulesync section
     const rulesyncSection = this.buildRulesyncSection(enabledRules);
-    
+
     // Check if rulesync section already exists
     const rulesyncStartMarker = '# Rulesync - AI Assistant Rules';
     const rulesyncEndMarker = '# End Rulesync';
@@ -42,7 +45,7 @@ export class GitignoreCommand {
       // Replace existing section
       const startIndex = gitignoreContent.indexOf(rulesyncStartMarker);
       const endIndex = gitignoreContent.indexOf(rulesyncEndMarker);
-      
+
       if (endIndex !== -1) {
         const beforeSection = gitignoreContent.substring(0, startIndex);
         const afterSection = gitignoreContent.substring(endIndex + rulesyncEndMarker.length);
@@ -62,24 +65,22 @@ export class GitignoreCommand {
     // Write the updated .gitignore
     fs.writeFileSync(gitignorePath, gitignoreContent);
 
-    console.log(chalk.green(`Updated .gitignore with ${enabledRules.length} AI assistant rule files.`));
+    console.log(
+      chalk.green(`Updated .gitignore with ${enabledRules.length} AI assistant rule files.`)
+    );
     console.log(chalk.blue('Added entries:'));
-    
-    enabledRules.forEach(rule => {
+
+    enabledRules.forEach((rule) => {
       console.log(`  ${rule.gitignorePath()}`);
     });
 
     return 0;
   }
 
-  private buildRulesyncSection(rules: any[]): string {
-    const lines = [
-      '# Rulesync - AI Assistant Rules',
-      '# Generated automatically by rulesync',
-      ''
-    ];
+  private buildRulesyncSection(rules: AgentInterface[]): string {
+    const lines = ['# Rulesync - AI Assistant Rules', '# Generated automatically by rulesync', ''];
 
-    rules.forEach(rule => {
+    rules.forEach((rule) => {
       lines.push(rule.gitignorePath());
     });
 
