@@ -15,13 +15,15 @@ export class ConfigCommand {
     console.log(chalk.blue('Current Configuration:'));
     console.log('');
     console.log(`${chalk.cyan('Config file:')} ${configPath}`);
-    console.log(`${chalk.cyan('Project type:')} ${this.configService.isLocalProject() ? 'Local' : 'Global'}`);
+    console.log(
+      `${chalk.cyan('Project type:')} ${this.configService.isLocalProject() ? 'Local' : 'Global'}`
+    );
     console.log('');
 
     if (config.disabled_rules && config.disabled_rules.length > 0) {
-      console.log(`${chalk.cyan('Disabled rules:')} ${config.disabled_rules.join(', ')}`);
+      console.log(`${chalk.cyan('Disabled agents:')} ${config.disabled_rules.join(', ')}`);
     } else {
-      console.log(`${chalk.cyan('Disabled rules:')} None`);
+      console.log(`${chalk.cyan('Disabled agents:')} None`);
     }
 
     if (config.base_rules_path) {
@@ -31,7 +33,9 @@ export class ConfigCommand {
     }
 
     if (config.augment !== undefined) {
-      console.log(`${chalk.cyan('Augment preference:')} ${config.augment ? 'Combine local and global' : 'Use local only'}`);
+      console.log(
+        `${chalk.cyan('Augment preference:')} ${config.augment ? 'Combine local and global' : 'Use local only'}`
+      );
     } else {
       console.log(`${chalk.cyan('Augment preference:')} Not set (will prompt)`);
     }

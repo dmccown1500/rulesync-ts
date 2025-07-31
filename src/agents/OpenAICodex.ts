@@ -1,6 +1,6 @@
-import { RuleInterface } from './RuleInterface';
+import { AgentInterface } from './AgentInterface';
 
-export class OpenAICodex implements RuleInterface {
+export class OpenAICodex implements AgentInterface {
   name(): string {
     return 'OpenAI Codex';
   }

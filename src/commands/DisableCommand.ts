@@ -11,13 +11,23 @@ export class DisableCommand {
     this.ruleDiscovery = new RuleDiscoveryService();
   }
 
-  execute(ruleIdentifier: string): number {
+  execute(ruleIdentifier: string, showDeprecationWarning: boolean = true): number {
+    if (showDeprecationWarning) {
+      console.log(
+        chalk.yellow(
+          '⚠️  DEPRECATED: The "disable" command is deprecated and will be removed in a future version.'
+        )
+      );
+      console.log(chalk.yellow('   Please use "agents disable" instead.'));
+      console.log('');
+    }
+
     const rules = this.ruleDiscovery.getRules();
-    
+
     // Try to find rule by index or shortcode
     let rule;
     const ruleIndex = parseInt(ruleIdentifier);
-    
+
     if (!isNaN(ruleIndex) && ruleIndex >= 0 && ruleIndex < rules.length) {
       rule = rules[ruleIndex];
     } else {
@@ -26,12 +36,12 @@ export class DisableCommand {
 
     if (!rule) {
       console.error(chalk.red(`Rule not found: ${ruleIdentifier}`));
-      console.log('Use "rulesync rules:list" to see available rules.');
+      console.log('Use "rulesync agents" to see available agents.');
       return 1;
     }
 
     const disabledRules = this.configService.getDisabledRules();
-    
+
     if (disabledRules.includes(rule.shortcode())) {
       console.log(chalk.yellow(`Rule "${rule.name()}" is already disabled.`));
       return 0;

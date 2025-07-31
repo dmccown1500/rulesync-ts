@@ -1,6 +1,6 @@
-import { RuleInterface } from './RuleInterface';
+import { AgentInterface } from './AgentInterface';
 
-export class GitHubCopilot implements RuleInterface {
+export class GitHubCopilot implements AgentInterface {
   name(): string {
     return 'GitHub Copilot';
   }

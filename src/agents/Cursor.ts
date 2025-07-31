@@ -1,6 +1,6 @@
-import { RuleInterface } from './RuleInterface';
+import { AgentInterface } from './AgentInterface';
 
-export class Cursor implements RuleInterface {
+export class Cursor implements AgentInterface {
   name(): string {
     return 'Cursor';
   }

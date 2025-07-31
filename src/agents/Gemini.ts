@@ -1,6 +1,6 @@
-import { RuleInterface } from './RuleInterface';
+import { AgentInterface } from './AgentInterface';
 
-export class Gemini implements RuleInterface {
+export class Gemini implements AgentInterface {
   name(): string {
     return 'Gemini CLI';
   }

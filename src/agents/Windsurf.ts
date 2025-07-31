@@ -1,6 +1,6 @@
-import { RuleInterface } from './RuleInterface';
+import { AgentInterface } from './AgentInterface';
 
-export class Windsurf implements RuleInterface {
+export class Windsurf implements AgentInterface {
   name(): string {
     return 'Windsurf';
   }

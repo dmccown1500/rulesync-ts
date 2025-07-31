@@ -1,6 +1,6 @@
-import { RuleInterface } from './RuleInterface';
+import { AgentInterface } from './AgentInterface';
 
-export class Claude implements RuleInterface {
+export class Claude implements AgentInterface {
   name(): string {
     return 'Claude';
   }
