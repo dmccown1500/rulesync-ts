@@ -1,7 +1,7 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as os from 'os';
-import { Config } from '../types';
+import { Config, CompositionRule } from '../types';
 
 export class ConfigService {
   private configPath: string;
@@ -29,8 +29,10 @@ export class ConfigService {
   }
 
   isLocalProject(): boolean {
-    return fs.existsSync(path.join(process.cwd(), 'package.json')) || 
-           fs.existsSync(path.join(process.cwd(), 'composer.json'));
+    return (
+      fs.existsSync(path.join(process.cwd(), 'package.json')) ||
+      fs.existsSync(path.join(process.cwd(), 'composer.json'))
+    );
   }
 
   getDisabledRules(): string[] {
@@ -52,7 +54,7 @@ export class ConfigService {
 
   enableRule(shortcode: string): void {
     const disabled = this.getDisabledRules();
-    this.config.disabled_rules = disabled.filter(rule => rule !== shortcode);
+    this.config.disabled_rules = disabled.filter((rule) => rule !== shortcode);
     this.saveConfig();
   }
 
@@ -86,7 +88,7 @@ export class ConfigService {
       try {
         const content = fs.readFileSync(this.configPath, 'utf8');
         this.config = JSON.parse(content);
-      } catch (error) {
+      } catch {
         this.config = {};
       }
     } else {
@@ -96,5 +98,35 @@ export class ConfigService {
 
   private saveConfig(): void {
     fs.writeFileSync(this.configPath, JSON.stringify(this.config, null, 2));
+  }
+
+  getCompositionRules(): CompositionRule[] {
+    return this.config.composition_rules || [];
+  }
+
+  addCompositionRule(rule: CompositionRule): void {
+    const rules = this.getCompositionRules();
+    const existingIndex = rules.findIndex((r) => r.name === rule.name);
+
+    if (existingIndex >= 0) {
+      rules[existingIndex] = rule;
+    } else {
+      rules.push(rule);
+    }
+
+    this.config.composition_rules = rules;
+    this.saveConfig();
+  }
+
+  removeCompositionRule(name: string): void {
+    const rules = this.getCompositionRules();
+    this.config.composition_rules = rules.filter((r) => r.name !== name);
+    this.saveConfig();
+  }
+
+  getEnabledCompositionRules(): CompositionRule[] {
+    return this.getCompositionRules()
+      .filter((rule) => rule.enabled !== false)
+      .sort((a, b) => (a.priority || 0) - (b.priority || 0));
   }
 }
