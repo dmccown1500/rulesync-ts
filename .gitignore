@@ -75,7 +75,6 @@ jspm_packages/
 
 # Nuxt.js build / generate output
 .nuxt
-dist
 
 # Storybook build outputs
 .out
@@ -87,5 +86,20 @@ temp/
 
 # Test files
 test-output/
+
+# Generated rule files (from development/testing)
+rulesync.md
+CLAUDE.md
+GEMINI.md
+AGENTS.md
+.cursorrules
+.windsurfrules
+.clinerules/
+.junie/
+.aider.conf.yml
+.continue/
+.amazonq/
+.vscode/cody.json
+.rulesync/
 
 

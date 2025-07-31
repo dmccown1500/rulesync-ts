@@ -7,9 +7,6 @@ tsconfig.json
 # Development files
 jest.config.js
 install.sh
-PUBLISHING.md
-RELEASE_NOTES.md
-EXAMPLE.md
 
 # Test files
 **/*.test.ts
@@ -50,6 +47,10 @@ AGENTS.md
 .junie/
 .github/copilot-instructions.md
 .rulesync/
+.aider.conf.yml
+.continue/
+.amazonq/
+.vscode/cody.json
 
 # Temporary files
 *.tmp

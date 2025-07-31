@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2025-07-31
+
+### Fixed
+
+- **Package Distribution**: Updated .npmignore to exclude deleted files (RELEASE_NOTES.md, EXAMPLE.md, PUBLISHING.md)
+- **Git Ignore**: Removed duplicate `dist` entry and added generated rule files from development/testing
+- **NPM Package**: Added new generated agent files to .npmignore (.aider.conf.yml, .continue/, .amazonq/, .vscode/cody.json)
+
+### Technical Improvements
+
+- Cleaner npm package distribution with only necessary files
+- Better development workflow with proper ignore patterns
+
 ## [1.1.0] - 2025-07-31
 
 ### Added
@@ -138,5 +151,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ESLint and Prettier for code quality
 - tsx for development execution
 
+[1.1.1]: https://github.com/dmccown1500/rulesync-ts/releases/tag/v1.1.1
 [1.1.0]: https://github.com/dmccown1500/rulesync-ts/releases/tag/v1.1.0
 [1.0.0]: https://github.com/dmccown1500/rulesync-ts/releases/tag/v1.0.0
