@@ -97,7 +97,13 @@ describe('ComposeCommand', () => {
     mockFs.readFile.mockResolvedValue('# Test content');
 
     // Setup default mocks for path
-    mockPath.join.mockImplementation((...paths: string[]) => paths.join('/'));
+    mockPath.join.mockImplementation((...paths: string[]) => {
+      // Handle __dirname-based template paths: join(__dirname, '..', '..', 'templates')
+      if (paths.length >= 4 && paths[1] === '..' && paths[2] === '..' && paths[3] === 'templates') {
+        return '/test/project/templates' + (paths.length > 4 ? '/' + paths.slice(4).join('/') : '');
+      }
+      return paths.join('/');
+    });
     mockPath.resolve.mockImplementation((...paths: string[]) => {
       if (paths[0] === '/test/project') {
         return paths.join('/');
@@ -120,6 +126,9 @@ describe('ComposeCommand', () => {
 
     // Mock process.cwd
     jest.spyOn(process, 'cwd').mockReturnValue('/test/project');
+
+    // Mock __dirname for template path resolution
+    (global as any).__dirname = '/test/project/src/__tests__/commands';
 
     composeCommand = new ComposeCommand();
   });
@@ -264,6 +273,55 @@ describe('ComposeCommand', () => {
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         '[RED]Failed to resolve rule: nonexistent-rule[/RED]'
       );
+    });
+
+    test('should resolve templates correctly regardless of user working directory', async () => {
+      // Test that templates are found via __dirname-relative path, not process.cwd()
+      
+      // Simulate user running command from a subdirectory
+      jest.spyOn(process, 'cwd').mockReturnValue('/some/other/user/directory');
+      
+      mockGetEnabledCompositionRules.mockReturnValue([{
+        name: 'react',
+        path: '/test/project/templates/framework/react.md',
+        priority: 1,
+        enabled: true
+      }]);
+
+      // Templates should still be found at package location, not user's cwd
+      mockFs.existsSync.mockImplementation((filePath: string) => {
+        if (filePath === '/test/project/templates') return true;
+        if (filePath === '/test/project/templates/framework/react.md') return true;
+        if (filePath === '/some/other/user/directory/rulesync.md') return true;
+        return false;
+      });
+
+      mockFs.readdir.mockImplementation(async (dirPath: string) => {
+        if (dirPath === '/test/project/templates') {
+          return [
+            { name: 'framework', isDirectory: () => true, isFile: () => false }
+          ];
+        }
+        if (dirPath === '/test/project/templates/framework') {
+          return [
+            { name: 'react.md', isDirectory: () => false, isFile: () => true }
+          ];
+        }
+        return [];
+      });
+
+      const result = await composeCommand.execute(['react']);
+
+      expect(result).toBe(0);
+      expect(mockAddCompositionRule).toHaveBeenCalledWith({
+        name: 'react',
+        path: '/test/project/templates/framework/react.md',
+        priority: 1,
+        enabled: true,
+      });
+
+      // Restore original cwd mock for other tests
+      jest.spyOn(process, 'cwd').mockReturnValue('/test/project');
     });
 
     test('should assign correct priorities to multiple rules', async () => {

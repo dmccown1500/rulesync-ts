@@ -24,7 +24,7 @@ const program = new Command();
 
 program
   .name('rulesync')
-  .description(chalk.cyan('Sync AI assistant rules across Claude, Cursor, Windsurf, and more'))
+  .description(chalk.cyan('Sync AI assistant rules across 12 AI assistants including Claude, Cursor, Windsurf, GitHub Copilot, and more'))
   .version(packageJson.version);
 
 // Generate command
@@ -57,18 +57,18 @@ agentsProgram
 agentsProgram
   .command('enable <agent>')
   .description(chalk.green('Enable rule generation for an AI assistant'))
-  .action((rule) => {
+  .action((agent) => {
     const command = new AgentsCommand();
-    const exitCode = command.executeEnable(rule);
+    const exitCode = command.executeEnable(agent);
     process.exit(exitCode);
   });
 
 agentsProgram
   .command('disable <agent>')
   .description(chalk.red('Disable rule generation for an AI assistant'))
-  .action((rule) => {
+  .action((agent) => {
     const command = new AgentsCommand();
-    const exitCode = command.executeDisable(rule);
+    const exitCode = command.executeDisable(agent);
     process.exit(exitCode);
   });
 
@@ -173,16 +173,21 @@ program
 program.action(() => {
   console.log(chalk.blue.bold('🤖 Rulesync - Sync Rules Across AI Assistants'));
   console.log('');
-  console.log(chalk.green('Quick Start:'));
+  console.log(chalk.green('Quick Start (Template-based):'));
+  console.log('  1. ' + chalk.yellow('rulesync templates') + '                      - Browse 28+ templates');
+  console.log('  2. ' + chalk.yellow('rulesync compose base/clean-code react') + '  - Compose from templates');
+  console.log('  3. ' + chalk.yellow('rulesync generate') + '                       - Generate assistant files');
+  console.log('  4. ' + chalk.yellow('rulesync gitignore') + '                      - Add to version control');
+  console.log('');
+  console.log(chalk.green('Alternative (Custom):'));
   console.log('  1. Create a ' + chalk.cyan('rulesync.md') + ' file with your coding rules');
   console.log('  2. Run ' + chalk.yellow('rulesync generate') + ' to create assistant-specific files');
-  console.log('  3. Your rules are now synced across Claude, Cursor, Windsurf, and more!');
   console.log('');
   console.log(chalk.green('Common Commands:'));
-  console.log('  ' + chalk.yellow('rulesync generate') + '           Create rule files from rulesync.md');
-  console.log('  ' + chalk.yellow('rulesync agents') + '             List all AI assistants');
   console.log('  ' + chalk.yellow('rulesync templates') + '          Show available templates');
-  console.log('  ' + chalk.yellow('rulesync compose clean-code') + '  Compose rules from multiple sources');
+  console.log('  ' + chalk.yellow('rulesync compose [...]') + '      Compose rules from multiple sources');
+  console.log('  ' + chalk.yellow('rulesync generate') + '           Create rule files from rulesync.md');
+  console.log('  ' + chalk.yellow('rulesync agents') + '             List and manage AI assistants');
   console.log('');
   console.log('Run ' + chalk.cyan('rulesync --help') + ' for all commands');
 });

@@ -1,6 +1,6 @@
 {
     "name": "rulesync-ts",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "description": "Easily sync all of your favorite AI assistant instruction files - TypeScript version",
     "main": "dist/index.js",
     "bin": {

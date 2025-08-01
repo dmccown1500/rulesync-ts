@@ -6,7 +6,6 @@ tsconfig.json
 
 # Development files
 jest.config.js
-install.sh
 
 # Test files
 **/*.test.ts

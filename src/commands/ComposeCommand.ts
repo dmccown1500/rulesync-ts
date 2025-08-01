@@ -78,7 +78,7 @@ export class ComposeCommand {
     }
 
     // Try to find matching file in templates directory (including folder paths like "base/clean-code")
-    const templatesDir = path.join(process.cwd(), 'templates');
+    const templatesDir = path.join(__dirname, '..', '..', 'templates');
     const possibleFiles = await this.findMatchingTemplateFiles(identifier, templatesDir);
 
     if (possibleFiles.length === 1) {
@@ -192,7 +192,7 @@ export class ComposeCommand {
   }
 
   async listAvailableTemplates(): Promise<number> {
-    const templatesDir = path.join(process.cwd(), 'templates');
+    const templatesDir = path.join(__dirname, '..', '..', 'templates');
 
     if (!fs.existsSync(templatesDir)) {
       console.log(chalk.yellow('No templates directory found'));

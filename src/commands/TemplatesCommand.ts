@@ -6,7 +6,8 @@ export class TemplatesCommand {
   private templatesDir: string;
 
   constructor() {
-    this.templatesDir = join(process.cwd(), 'templates');
+    // Look for templates relative to the package installation directory
+    this.templatesDir = join(__dirname, '..', '..', 'templates');
   }
 
   execute(): number {
@@ -86,6 +87,7 @@ export class TemplatesCommand {
     const descriptions: Record<string, Record<string, string>> = {
       base: {
         'clean-code.md': "Robert Martin's Clean Code principles",
+        'no-sycophancy.md': 'Direct, honest communication without excessive praise',
       },
       language: {
         'typescript.md': 'TypeScript best practices and patterns',

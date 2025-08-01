@@ -28,7 +28,6 @@ Rulesync is a powerful CLI tool that helps you maintain consistent AI assistant 
   - [Base Rules](#base-rules)
   - [Agent Management](#agent-management)
   - [Configuration Files](#configuration-files)
-  - [Global vs Local Configuration](#global-vs-local-configuration)
 - [Workflow Examples](#workflow-examples)
 - [Generated File Structure](#generated-file-structure)
 - [Advanced Usage](#advanced-usage)
@@ -40,7 +39,7 @@ Rulesync is a powerful CLI tool that helps you maintain consistent AI assistant 
 
 ## Features
 
-- 🎯 **Template-based composition** - Choose from 25+ pre-built rule templates
+- 🎯 **Template-based composition** - Choose from 28+ pre-built rule templates
 - 🤖 **12 AI assistants supported** - Claude, Cursor, Windsurf, GitHub Copilot, Gemini, Cline, Junie, OpenAI Codex, Aider, Continue.dev, Amazon Q Developer, Sourcegraph Cody
 - 📝 **Smart rule generation** - One source, multiple agent-specific formats
 - 🎨 **Flexible composition** - Mix templates, local files, and remote URLs
@@ -116,6 +115,7 @@ Both approaches create the same result - AI assistant files generated from your 
 ### Base Templates
 
 - **clean-code** - Robert Martin's Clean Code principles
+- **no-sycophancy** - Direct, honest communication without excessive praise
 - **security** - Security best practices and guidelines
 - **testing** - Testing strategies and methodologies
 - **documentation** - Documentation standards
@@ -183,7 +183,7 @@ rulesync compose <template1> <template2> [files...]
 # Generate AI assistant files
 rulesync generate [options]
 
-# Manage AI assistants (see [Agent Management](#agent-management))
+# Manage AI assistants
 rulesync agents [enable|disable] [assistant]
 
 # View configuration
@@ -195,6 +195,8 @@ rulesync gitignore
 # Set base rules
 rulesync base [path]
 ```
+
+> **Note**: For details on managing AI assistants, see [Agent Management](#agent-management)
 
 ### Examples
 
