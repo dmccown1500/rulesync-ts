@@ -57,7 +57,7 @@ const mockRules = [
 const mockCompositionRules = [
   {
     name: 'base/clean-code',
-    path: '/test/examples/base/clean-code.md',
+    path: '/test/templates/base/clean-code.md',
     priority: 1,
     enabled: true,
   },

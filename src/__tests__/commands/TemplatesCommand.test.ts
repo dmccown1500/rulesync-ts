@@ -22,8 +22,10 @@ jest.mock('fs', () => ({
 }));
 
 // Mock path
+const mockJoin = jest.fn();
+
 jest.mock('path', () => ({
-  join: (...paths: string[]) => paths.join('/'),
+  join: mockJoin,
 }));
 
 // Mock process.cwd
@@ -47,11 +49,22 @@ describe('TemplatesCommand', () => {
   beforeEach(() => {
     consoleSpy = jest.spyOn(console, 'log').mockImplementation();
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    templatesCommand = new TemplatesCommand();
 
     // Reset mocks
     mockReaddirSync.mockClear();
     mockStatSync.mockClear();
+    mockJoin.mockClear();
+
+    // Set up default mockJoin implementation similar to ComposeCommand test
+    mockJoin.mockImplementation((...paths: string[]) => {
+      // Handle __dirname-based template paths: join(__dirname, '..', '..', 'templates')
+      if (paths.length >= 4 && paths[1] === '..' && paths[2] === '..' && paths[3] === 'templates') {
+        return '/test/project/templates' + (paths.length > 4 ? '/' + paths.slice(4).join('/') : '');
+      }
+      return paths.join('/');
+    });
+
+    templatesCommand = new TemplatesCommand();
   });
 
   afterEach(() => {
@@ -189,6 +202,32 @@ describe('TemplatesCommand', () => {
 
       expect(consoleSpy).toHaveBeenCalledWith('[CYAN]Base:[/CYAN]');
       expect(consoleSpy).not.toHaveBeenCalledWith('[CYAN]Empty:[/CYAN]');
+    });
+
+    test('should find templates using package-relative path regardless of user working directory', () => {
+      // This test verifies that TemplatesCommand uses __dirname-relative paths, not process.cwd()
+      
+      // The TemplatesCommand constructor sets this.templatesDir = join(__dirname, '..', '..', 'templates')
+      // Since we mock join() to return '/test/project/templates' for __dirname-based paths,
+      // the templates should be found regardless of where the user runs the command from
+      
+      mockReaddirSync
+        .mockReturnValueOnce(['base']) // templates directory
+        .mockReturnValueOnce(['clean-code.md']); // base directory
+
+      mockStatSync.mockReturnValue({ isDirectory: () => true });
+
+      const result = templatesCommand.execute();
+
+      expect(result).toBe(0);
+      expect(consoleSpy).toHaveBeenCalledWith('[BLUE]Available Templates:[/BLUE]');
+      expect(consoleSpy).toHaveBeenCalledWith('[CYAN]Base:[/CYAN]');
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringMatching(/\[GREEN\]•\[\/GREEN\].*\[WHITE\]base\/clean-code\[\/WHITE\]/)
+      );
+      
+      // Verify the mocked join was called with __dirname-relative path structure
+      expect(mockJoin).toHaveBeenCalledWith(expect.any(String), '..', '..', 'templates');
     });
   });
 

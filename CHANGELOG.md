@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2025-08-01
+
+### Added
+
+- **New Template**: Added `base/no-sycophancy` template for direct, honest AI communication without excessive praise
+
+### Fixed
+
+- **Critical Bug**: Fixed template directory path resolution when package is installed via npm
+  - ComposeCommand and TemplatesCommand now use package-relative paths instead of `process.cwd()`
+  - Templates directory is now correctly located at `__dirname + '/../../templates'`
+  - This resolves the issue where npm-installed packages couldn't find their templates
+- **Test Suite**: Updated ComposeCommand tests to work with new path resolution logic
+  - Fixed path mocking to handle `__dirname`-based template paths
+  - Added tests to verify path resolution works regardless of user working directory
+  - All 213 tests now pass with the updated path resolution
+- **Documentation**: Fixed README.md links and table of contents
+  - Moved `[Agent Management](#agent-management)` link outside code block where it works as clickable link
+  - Removed broken "Global vs Local Configuration" table of contents entry
+  - All documentation links now function properly
+- **CLI Help Text**: Improved command help accuracy and formatting
+  - Updated main description to reflect 12 supported AI assistants
+  - Enhanced Quick Start to prioritize template-based workflow
+  - Fixed parameter naming consistency in agents enable/disable commands
+  - Added clear step-by-step instructions for both template and custom workflows
+- **Directory References**: Fixed remaining "examples" references that should be "templates"
+  - Updated GenerateCommand test to use `/test/templates/` instead of `/test/examples/`
+  - All directory references now consistent with examples → templates rename
+
+### Removed
+
+- **install.sh** - Obsolete installation script (users should use `npm install -g rulesync-ts`)
+  - Updated .npmignore to remove reference to deleted file
+
+### Technical Details
+
+- Changed from `process.cwd() + '/templates'` to `path.join(__dirname, '..', '..', 'templates')`
+- Ensures templates are found relative to package installation directory, not user's current working directory
+- Maintains backward compatibility for all existing functionality
+- Updated template count references from 25+ to 28+ templates across documentation and CLI help
+
 ## [1.1.1] - 2025-07-31
 
 ### Fixed
@@ -151,6 +192,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ESLint and Prettier for code quality
 - tsx for development execution
 
+[1.1.2]: https://github.com/dmccown1500/rulesync-ts/releases/tag/v1.1.2
 [1.1.1]: https://github.com/dmccown1500/rulesync-ts/releases/tag/v1.1.1
 [1.1.0]: https://github.com/dmccown1500/rulesync-ts/releases/tag/v1.1.0
 [1.0.0]: https://github.com/dmccown1500/rulesync-ts/releases/tag/v1.0.0
